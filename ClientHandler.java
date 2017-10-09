@@ -18,11 +18,13 @@ public class ClientHandler implements Runnable
 {
 	private Socket connectionSock = null;
 	private ArrayList<Socket> socketList;
+	private Game mygame = null;
 
-	ClientHandler(Socket sock, ArrayList<Socket> socketList)
+	ClientHandler(Socket sock, ArrayList<Socket> socketList, Game mygame)
 	{
 		this.connectionSock = sock;
 		this.socketList = socketList;	// Keep reference to master list
+		this.mygame = mygame;
 	}
 
 	public void run()
@@ -33,6 +35,8 @@ public class ClientHandler implements Runnable
 			System.out.println("Connection made with socket " + connectionSock);
 			BufferedReader clientInput = new BufferedReader(
 				new InputStreamReader(connectionSock.getInputStream()));
+				System.out.println("In MTClientHandler: ");
+				System.out.println(mygame.buzzed);
 			while (true)
 			{
 				// Get data sent from a client
@@ -40,6 +44,16 @@ public class ClientHandler implements Runnable
 				if (clientText != null)
 				{
 					System.out.println("Received: " + clientText);
+					System.out.println(connectionSock);
+					System.out.println("In Client Handler line 48" +mygame.buzzed);
+					//mygame.buzzed = connectionSock;
+					System.out.println("In Client Handler line 50" +mygame.buzzed);
+					if (mygame.buzzed ==null){
+						System.out.println("mygame.buzzed is null so we are first");
+						mygame.buzzed = connectionSock;
+						System.out.println(mygame.buzzed);
+						String message = connectionSock + " has connected first";
+
 					// Turn around and output this data
 					// to all other clients except the one
 					// that sent us this information
@@ -48,9 +62,10 @@ public class ClientHandler implements Runnable
 						if (s != connectionSock)
 						{
 							DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-							clientOutput.writeBytes(clientText + "\n");
+							clientOutput.writeBytes(message + "\n");
 						}
 					}
+				}
 				}
 				else
 				{

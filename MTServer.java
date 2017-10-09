@@ -25,13 +25,17 @@ public class MTServer
 {
 	// Maintain list of all client sockets for broadcast
 	private ArrayList<Socket> socketList;
+	private ArrayList<Player> playerList;
 	private int numberOfPlayers = 2;
 	private int numberConnected = 0;
 	private String question = "";
+	private Game mygame = null;
 
 	public MTServer()
 	{
 		socketList = new ArrayList<Socket>();
+		playerList = new ArrayList<Player>();
+		mygame = new Game(playerList);
 	}
 
 	private void getConnection()
@@ -41,6 +45,8 @@ public class MTServer
 		{
 			System.out.println("Waiting for client connections on port 7654.");
 			ServerSocket serverSock = new ServerSocket(7654);
+			System.out.println("In MTServer: ");
+			System.out.println(mygame.buzzed);
 			// This is an infinite loop, the user will have to shut it down
 			// using control-c
 			while (numberConnected < numberOfPlayers)
@@ -50,12 +56,12 @@ public class MTServer
 				socketList.add(connectionSock);
 				numberConnected++;
 				// Send to ClientHandler the socket and arraylist of all sockets
-				ClientHandler handler = new ClientHandler(connectionSock, this.socketList);
+				ClientHandler handler = new ClientHandler(connectionSock, this.socketList,mygame);
 				Thread theThread = new Thread(handler);
 				theThread.start();
 			}
 			System.out.println("All players have connected\n");
-			while (true){
+			//while (true){
 			question = "How many bits in an IP address?\n";
 			for (Socket s : socketList)
 			{
@@ -65,7 +71,8 @@ public class MTServer
 					clientOutput.writeBytes(question + "\n");
 
 			}
-		}
+
+		//}
 
 
 			// Will never get here, but if the above loop is given

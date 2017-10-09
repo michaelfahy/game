@@ -1,0 +1,11 @@
+Consider the latency model for dynamic congestion windows. Which of the following components contribute to latency
+a)round trip time, RTT
+b)the transmission time of the object, O/R
+c)the sum of all the stalled times
+*d)all of the above
+
+When a TCP segment arrives to a host, the socket to which the segment is directed depends on
+a)the destination port number
+*b)the source port number
+c)the source IP address of the datagram that encapsulated the segment
+d)all of the above
