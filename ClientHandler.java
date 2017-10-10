@@ -65,6 +65,12 @@ public class ClientHandler implements Runnable
 							clientOutput.writeBytes(message + "\n");
 						}
 					}
+					message = "You buzzed first.  Waht is your answer?";
+					DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
+					clientOutput.writeBytes(message + "\n");
+					clientText = clientInput.readLine();
+					System.out.println(clientText);
+
 				}
 				}
 				else
