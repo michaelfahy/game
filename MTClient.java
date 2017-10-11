@@ -13,7 +13,7 @@
  *
  * Data received is sent to the output screen, so it is possible that as
  * a user is typing in information a message from the server will be
- * inserted.  
+ * inserted.
  *
  */
 import java.net.Socket;
@@ -27,6 +27,8 @@ public class MTClient
 {
 	public static void main(String[] args)
 	{
+
+
 		try
 		{
 			String hostname = "localhost";
@@ -44,10 +46,17 @@ public class MTClient
 			Thread theThread = new Thread(listener);
 			theThread.start();
 
+			//Prompt for the user's nme and send it to the server
+
+	
+			Scanner keyboard = new Scanner(System.in);
+			String name = keyboard.nextLine();
+			serverOutput.writeBytes(name + "\n");
+
 			// Read input from the keyboard and send it to everyone else.
 			// The only way to quit is to hit control-c, but a quit command
-			// could easily be added.
-			Scanner keyboard = new Scanner(System.in);
+			// could easily be added
+
 			while (true)
 			{
 				String data = keyboard.nextLine();
@@ -60,4 +69,3 @@ public class MTClient
 		}
 	}
 } // MTClient
-

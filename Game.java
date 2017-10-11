@@ -6,12 +6,16 @@ public class Game
 {
 	// Maintain list of all client sockets for broadcast
 	private ArrayList<Player> playerList;
-	private ArrayList<Question> questionList;
+	public ArrayList<Question> questionList;
 	private int numberOfPlayers = 2;
 	private int numberConnected = 0;
 	private String question = "";
   public Socket buzzed = null;
 	public Question aquestion = null;
+	public int nextQuestion = 0;
+	public int currentCorrect = -1;
+	public int over = 0;
+
 
 	public Game(ArrayList<Player> playerList)
 	{
@@ -26,12 +30,10 @@ public class Game
 
         try {
             // FileReader reads text files in the default encoding.
-            FileReader fileReader =
-                new FileReader(fileName);
+            FileReader fileReader =  new FileReader(fileName);
 
             // Always wrap FileReader in BufferedReader.
-            BufferedReader bufferedReader =
-                new BufferedReader(fileReader);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             while((line = bufferedReader.readLine()) != null) {
 							aquestion = new Question();
@@ -41,10 +43,10 @@ public class Game
 								line = bufferedReader.readLine();
 								if (line.substring(0,1).equals("*")){
 									aquestion.correct = i;
-									aquestion.answer[i]= line.substring(3,line.length());
+									aquestion.answer[i]= line.substring(1,line.length());
 								}
 								else
-									aquestion.answer[i] = line.substring(2,line.length());
+									aquestion.answer[i] = line.substring(0,line.length());
 
 								System.out.println(aquestion.answer[i]);
 
@@ -63,13 +65,10 @@ public class Game
 
         catch(FileNotFoundException ex) {
             System.out.println(
-                "Unable to open file '" +
-                fileName + "'");
+                "Unable to open file '" +  fileName + "'");
         }
         catch(IOException ex) {
-            System.out.println(
-                "Error reading file '"
-                + fileName + "'");
+            System.out.println(  "Error reading file '"+ fileName + "'");
             // Or we could just do this:
             // ex.printStackTrace();
         }

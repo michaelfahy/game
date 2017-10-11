@@ -4,8 +4,8 @@ public class Player
 {
 	// Maintain list of all client sockets for broadcast
 
-	private int score = 0;
-	private String name = "";
+	public int score = 0;
+	public String name = "";
   public Socket connectionSock = null;
 
 	public Player(Socket connectionSock,String name)
