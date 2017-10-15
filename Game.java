@@ -38,9 +38,10 @@ public class Game
             while((line = bufferedReader.readLine()) != null) {
 							aquestion = new Question();
 							aquestion.thequestion = line;
-							System.out.println(aquestion.thequestion);
+							//System.out.println(aquestion.thequestion);
 							for(int i=0; i<4; i++){
 								line = bufferedReader.readLine();
+								//Find the correct answer and store it
 								if (line.substring(0,1).equals("*")){
 									aquestion.correct = i;
 									aquestion.answer[i]= line.substring(1,line.length());
@@ -48,14 +49,14 @@ public class Game
 								else
 									aquestion.answer[i] = line.substring(0,line.length());
 
-								System.out.println(aquestion.answer[i]);
+								//System.out.println(aquestion.answer[i]);
 
 								}
-								System.out.println(aquestion.correct);
+								//System.out.println(aquestion.correct);
 
 							questionList.add(aquestion);
 							line = bufferedReader.readLine();
-              System.out.println(line);
+              //System.out.println(line);
 						}
 
 

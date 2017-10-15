@@ -35,6 +35,11 @@ public class ClientListener implements Runnable
 				if (serverInput != null)
 				{
 					System.out.println(serverText);
+
+					if (serverText.length()>=7 && serverText.substring(0,7).equals("Goodbye")){
+						connectionSock.close();    //prepare to exit the while loop
+						break;
+					}
 				}
 				else
 				{

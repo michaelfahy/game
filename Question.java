@@ -12,7 +12,7 @@ public class Question
 	{
     {
       this.answer = new String[4];
-      this.correct = 5;
+      this.correct = -1;
     }
 	}
 }

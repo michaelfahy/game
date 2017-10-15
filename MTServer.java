@@ -27,11 +27,15 @@ public class MTServer
 	// Maintain list of all client sockets for broadcast
 	private ArrayList<Socket> socketList;
 	private ArrayList<Player> playerList;
+	private ServerSocket serverSock = null;
 	private int numberOfPlayers = 2;
 	private int numberConnected = 0;
 	private String question = "";
 	private Game mygame = null;
 	private String message;
+	private int questionNumber = 1;
+	private int numberOfQuestions = 0;
+	private int state = 0;
 
 	public MTServer()
 	{
@@ -40,13 +44,35 @@ public class MTServer
 		mygame = new Game(playerList);
 	}
 
+	public void showScores()
+	{
+		try
+		{
+			for (Player p :playerList){
+				DataOutputStream clientOutput = new DataOutputStream(p.connectionSock.getOutputStream());
+
+				for (Player pp :playerList){
+					if (pp.name.length() >0)
+					{
+						String message = pp.name + " has " + pp.score + " points. \n";
+						clientOutput.writeBytes(message + "\n");
+					}
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Error: " + e.toString());
+		}
+	}
+
 	private void getConnection()
 	{
 		// Wait for a connection from the client
 		try
 		{
 			System.out.println("Waiting for client connections on port 7654.");
-			ServerSocket serverSock = new ServerSocket(7654);
+			serverSock = new ServerSocket(7654);
 			System.out.print("In MTServer, buzzed is ");
 			System.out.println(mygame.buzzed);
 			// This is an infinite loop, the user will have to shut it down
@@ -82,52 +108,7 @@ public class MTServer
 				}
 			};
 
-			for (Player pp :playerList)  //Show the scores
-			{
-				message = pp.name + " has " + pp.score + " points. \n";
-				System.out.println(message);
-			}
-
-			//while (true){
-			for (Question q : mygame.questionList)
-			{  //Build a message with a question
-				mygame.currentCorrect = q.correct;
-				question = "\n\n"+q.thequestion + "\n\n";
-				for (int i=0; i<4; i++){
-					question = question + q.answer[i] + "\n";
-				}
-				question = question + "\nBuzz in!\n\n";
-
-				for (Player p : playerList)							//send the question to all players
-				{
-					DataOutputStream clientOutput = new DataOutputStream(p.connectionSock.getOutputStream());
-					clientOutput.writeBytes(question + "\n");
-				}
-				System.out.println("Question has been sent to all players.\n");
-				//System.out.println(mygame.nextQuestion);
-
-				while (mygame.nextQuestion == 0){		//Wait for a player to answer
-					try
-						{
-    					Thread.sleep(2000);
-						}
-						catch(InterruptedException ex)
-						{
-    					Thread.currentThread().interrupt();
-						}
-					System.out.println("Server sleeping \n");
-				}
-
-				mygame.nextQuestion = 0;
-				//System.out.println(mygame.nextQuestion);
-			}
-			mygame.over = 1;
-			//}
-			System.out.println("That was the last question!");
-
-			// Will never get here, but if the above loop is given
-			// an exit condition then we'll go ahead and close the socket
-			//serverSock.close();
+			showScores();
 		}
 		catch (IOException e)
 		{
@@ -135,9 +116,130 @@ public class MTServer
 		}
 	}
 
+public void askQuestions(int numberOfQuestions) throws java.io.IOException
+{
+
+			//while (true){
+			//numberOfQuestions = mygame.questionList.size();
+			for (Question q : mygame.questionList)
+			{ // If this is the last questions, game will be over
+				System.out.println(numberOfQuestions);
+				System.out.println(questionNumber);
+
+				switch (state) {
+
+					case 1:{ //build a question and send it to all players
+						if (questionNumber == numberOfQuestions){
+							mygame.over = 1;
+						}
+						questionNumber++;
+						//Build a message with a question
+						mygame.currentCorrect = q.correct;
+						question = "\n\n"+q.thequestion + "\n\n";
+						for (int i=0; i<4; i++){
+							question = question + q.answer[i] + "\n";
+						}
+						question = question + "\nBuzz in!\n\n";
+
+						for (Player p : playerList)							//send the question to all players
+						{
+							DataOutputStream clientOutput = new DataOutputStream(p.connectionSock.getOutputStream());
+							clientOutput.writeBytes(question + "\n");
+						}
+						System.out.println("Question has been sent to all players.\n");
+						//System.out.println(mygame.nextQuestion);
+						state = 2;
+						break;
+					}
+
+					case 2:	{ //wait for buzz and answer, signaled by mygame.nextQuestions == 1
+
+					while (mygame.nextQuestion == 0){		//Wait for a player to answer
+						try
+							{
+    						Thread.sleep(2000);
+							}
+							catch(InterruptedException ex)
+							{
+    						Thread.currentThread().interrupt();
+							}
+							System.out.println("Server sleeping \n");
+						}
+						try
+							{
+    						Thread.sleep(2000);
+							}
+							catch(InterruptedException ex)
+							{
+    						Thread.currentThread().interrupt();
+							}
+							System.out.println("Server sleeping \n");
+						
+
+						mygame.nextQuestion = 0;  //reset
+						showScores();
+
+						if (mygame.over == 1){
+							state = 3;
+						}
+						else{
+							state = 1;
+							break;
+						}
+
+					}
+
+					case 3:{ //all questions have been answered
+
+					System.out.println("That was the last question!");
+
+
+					for (Player pp :playerList)
+					{
+						DataOutputStream clientOutput = new DataOutputStream(pp.connectionSock.getOutputStream());
+						message = "Game Over \n";
+						clientOutput.writeBytes(message + "\n");
+						message = "Final Scores";
+						message = pp.name + " has " + pp.score + " points. \n";
+						clientOutput.writeBytes(message + "\n");
+						clientOutput.writeBytes("Goodbye\n");
+						//pp.connectionSock.close();
+						//playerList.remove(pp);
+					}
+
+					while (playerList.size() > 0){		//Wait for a players to exit
+						try
+						{
+							Thread.sleep(2000);
+						}
+						catch(InterruptedException ex)
+						{
+							Thread.currentThread().interrupt();
+						}
+						//System.out.println("Server sleeping \n");
+					}
+
+					// Will never get here, but if the above loop is given
+					// an exit condition then we'll go ahead and close the socket
+					serverSock.close();
+					break;
+				}
+			}
+		}
+
+}
+
 	public static void main(String[] args)
 	{
 		MTServer server = new MTServer();
 		server.getConnection();
+		server.state = 1;
+		try{
+  			server.askQuestions(server.mygame.questionList.size());
+		}
+		catch(IOException e){
+  		e.printStackTrace();
+		}
+
 	}
 } // MTServer
